@@ -1,6 +1,7 @@
 import Header from './Header.js'
 import Content from './Content.js'
 import Total from './Total.js'
+import Counter from './Counter.js'
 
 const App = () => {
 
@@ -28,6 +29,7 @@ const App = () => {
       <Header course = {course.name}/>
       <Content parts = {course.parts} />
       <Total parts = {course.parts} />
+      <Counter/>
     </div>
   )
 }
