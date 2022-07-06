@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 import Filter from './Filter.js'
 import PersonForm from './PersonForm.js'
@@ -6,16 +7,7 @@ import Persons from './Persons.js'
 
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { 
-      name: 'Arto Hellas',
-      phone: '994994121' 
-    },
-    {
-      name: 'Fernando',
-      phone: '986911850'
-    }
-  ]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [showAll, setShowAll] = useState(true)
@@ -38,14 +30,14 @@ const App = () => {
   const addContact = (event) => {
     event.preventDefault();
     console.log('button clicked', event.target);
-    const personObject = {name: newName, phone: newPhone}
+    const personObject = {name: newName, number: newPhone}
     if(!hasPerson(personObject)){
       console.log(`${newName} is not in the array`)
       const copy = [...persons]
       const newPersonObject = 
       {
         name: newName,
-        phone: newPhone
+        number: newPhone
       }
       setPersons(copy.concat(newPersonObject))
     } else {
@@ -67,7 +59,15 @@ const App = () => {
     setShowAll(false)
   }
 
-  console.log(personsToShow)
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+
+  }, [])
+
 
   return (
     <div>
