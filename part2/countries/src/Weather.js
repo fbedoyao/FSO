@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react'
 import axios from 'axios'
 
 const Weather = (props) => {
-    const API_key = '54b050942618a8bc606b1e746af34cd8'
+    const API_key = process.env.REACT_APP_API_KEY
     const [temp, setTemp] = useState('')
     const [icon, setIcon] = useState('03d')
     const [wind, setWind] = useState('')
