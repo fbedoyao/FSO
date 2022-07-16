@@ -3,7 +3,7 @@ const Persons = (props) => {
         <div>
             <ul>
                 {props.personsToShow.map( person =>
-                <li key = {person.id}> {person.name} {person.number}</li>  
+                <li key = {person.id}> {person.name} {person.number} <button onClick = {() => props.removeHandler(person.id, person.name)}>Remove</button></li>  
                 )}
             </ul>
         </div>

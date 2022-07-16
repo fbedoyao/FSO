@@ -5,6 +5,8 @@ import Filter from './Filter.js'
 import PersonForm from './PersonForm.js'
 import Persons from './Persons.js'
 
+import personService from './services/persons'
+
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -32,16 +34,28 @@ const App = () => {
     console.log('button clicked', event.target);
     const personObject = {name: newName, number: newPhone}
     if(!hasPerson(personObject)){
-      console.log(`${newName} is not in the array`)
       const copy = [...persons]
       const newPersonObject = 
       {
         name: newName,
         number: newPhone
       }
-      setPersons(copy.concat(newPersonObject))
+      //setPersons(copy.concat(newPersonObject))
+      personService
+        .create(newPersonObject)
+        .then(response => {
+          setPersons(copy.concat(response.data))
+        })
     } else {
-      alert(`${newName} is already added in the phonebook`)
+      if(window.confirm(`${personObject.name} is already in the phonebook. Do you want to replace the old number with the new one?`)){
+        const contactWithOldNumber = persons.find(person => person.name === personObject.name)
+        const contactWithNewNumber = {...contactWithOldNumber, number: personObject.number}
+        personService
+          .update(contactWithOldNumber.id, contactWithNewNumber)
+          .then(response => {
+            setPersons(persons.map(person => person.id !== contactWithOldNumber.id ? person : response.data))
+          })
+      }
     }
   }
 
@@ -59,9 +73,23 @@ const App = () => {
     setShowAll(false)
   }
 
+  const removeHandler = (id, name) => {
+    if(window.confirm(`Are you sure you want to delete ${name}?`)){
+      personService
+      .remove(id)
+      .then(() => {
+        personService
+          .getAll()
+          .then(response => {
+            setPersons(response.data)
+          })
+      })
+    }
+  }
+
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
+    personService
+      .getAll()
       .then(response => {
         setPersons(response.data)
       })
@@ -76,7 +104,7 @@ const App = () => {
       <h2>Add contact</h2>
       <PersonForm handleNameChange = {handleNameChange} handlePhoneChange = {handlePhoneChange} addContact = {addContact}/>
       <h2>Numbers</h2>
-      <Persons personsToShow={personsToShow}/>
+      <Persons personsToShow={personsToShow} removeHandler={removeHandler}/>
     </div>
   )
 }
