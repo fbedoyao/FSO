@@ -4,6 +4,7 @@ import axios from 'axios'
 import Filter from './Filter.js'
 import PersonForm from './PersonForm.js'
 import Persons from './Persons.js'
+import Notification from './Notification.js'
 
 import personService from './services/persons'
 
@@ -14,6 +15,8 @@ const App = () => {
   const [newPhone, setNewPhone] = useState('')
   const [showAll, setShowAll] = useState(true)
   const [filter, setFilter] = useState('');
+  const [errorMessage, setErrorMessage] = useState('')
+  const [messageType, setMessageType] = useState('')
 
   const personsToShow = showAll
     ? persons
@@ -45,6 +48,12 @@ const App = () => {
         .create(newPersonObject)
         .then(response => {
           setPersons(copy.concat(response.data))
+          setMessageType('success')
+          setErrorMessage(`Added ${newPersonObject.name}`)
+          setTimeout(() => {
+            setErrorMessage(null)
+            setMessageType('')
+          }, 5000)
         })
     } else {
       if(window.confirm(`${personObject.name} is already in the phonebook. Do you want to replace the old number with the new one?`)){
@@ -54,6 +63,15 @@ const App = () => {
           .update(contactWithOldNumber.id, contactWithNewNumber)
           .then(response => {
             setPersons(persons.map(person => person.id !== contactWithOldNumber.id ? person : response.data))
+          })
+          .catch(error => {
+            setMessageType('error')
+            setErrorMessage(`Information of ${contactWithOldNumber.name} has already been removed from server`)
+            setTimeout(() => {
+              setErrorMessage(null)
+              setMessageType('')
+            }, 5000)
+            setPersons(persons.filter(person => person.id !== contactWithOldNumber.id))
           })
       }
     }
@@ -82,7 +100,22 @@ const App = () => {
           .getAll()
           .then(response => {
             setPersons(response.data)
+            setMessageType('success')
+            setErrorMessage(`Deleted ${name}`)
+            setTimeout(() =>{
+              setErrorMessage(null)
+              setMessageType('')
+            }, 5000)
           })
+      })
+      .catch(error => {
+        setMessageType('error')
+        setErrorMessage(`Information of ${name} has already been removed from the server`)
+        setTimeout(() => {
+          setErrorMessage(null)
+          setMessageType('')
+        }, 5000)
+        setPersons(persons.filter(person => person.id !== id))
       })
     }
   }
@@ -100,6 +133,7 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message = {errorMessage} messageType={messageType}/>
       <Filter handler = {handleFilterChange} />
       <h2>Add contact</h2>
       <PersonForm handleNameChange = {handleNameChange} handlePhoneChange = {handlePhoneChange} addContact = {addContact}/>
